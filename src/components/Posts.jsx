@@ -1,25 +1,28 @@
-import  { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import Pagination from "./Pagination.jsx";
+import { useSearchParams } from "react-router-dom";
 
 function PaginationComponent() {
     const [posts, setPosts] = useState([]);
-    const [currentPage, setCurrentPage] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [searchParams, setSearchParams] = useSearchParams();
 
     useEffect(() => {
         const fetchPosts = async () => {
-            try{
-                const response = await axios.get(`https://dummyjson.com/posts?limit=10&skip=${currentPage  * 10}`)
+            try {
+                const response = await axios.get(`https://dummyjson.com/posts?limit=10&skip=${(currentPage - 1) * 10}`)
                 setPosts(response.data.posts)
-            }catch (e){
+            } catch (e) {
                 console.log("Ошибка при получении постов:", e)
             }
-
         };
         fetchPosts()
     }, [currentPage]);
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
+        setSearchParams({ ...searchParams, page: page.toString() }); // Обновление параметра page в URL
     };
 
     return (
@@ -32,14 +35,11 @@ function PaginationComponent() {
                 </ul>
             </div>
             <div className="pagination">
-                {[1, 2, 3, 4, 5].map(page => (
-                    <button key={page} onClick={() => handlePageChange(page)}>
-                        {page}
-                    </button>
-                ))}
+                <Pagination handlePageChange={handlePageChange} currentPage={currentPage} />
             </div>
         </div>
     );
 }
 
 export default PaginationComponent;
+
